@@ -9,9 +9,23 @@ import {
 } from "./components/index";
 import "./App.css";
 
+const cookies = new Cookies();
 const apiKey = "ahvy7k4rqz9g";
 const client = StreamChat.getInstance(apiKey);
-const authToken = false;
+const authToken = cookies.get("token");
+
+
+if (authToken) {
+  client.connectUser({
+    token: cookies.get("token"),
+    userName: cookies.get("userName"),
+    fullName: cookies.get("fullName"),
+    userId: cookies.get("userId"),
+    phoneNumber: cookies.get("phoneNumber"),
+    avatar: cookies.get("avatar"),
+    hashedpassword: cookies.get("hashedPasword"),
+  });
+}
 
 const App = () => {
   if (!authToken) return <Auth />;

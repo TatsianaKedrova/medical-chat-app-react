@@ -3,16 +3,18 @@ import Cookies from "universal-cookie";
 import axios from "axios";
 import signup from "../assets/signup.jpg";
 
-const Auth = () => {
-  const initialState = {
-    fullName: "",
-    userName: "",
-    password: "",
-    avatarUrl: "",
-    confirmPassword: "",
-    phoneNumber: "",
-  };
+const cookies = new Cookies();
 
+const initialState = {
+  fullName: "",
+  userName: "",
+  password: "",
+  avatarUrl: "",
+  confirmPassword: "",
+  phoneNumber: "",
+};
+
+const Auth = () => {
   const [form, setForm] = useState(initialState);
   const [isSignUp, setIsSignUp] = useState(false);
 
@@ -24,9 +26,33 @@ const Auth = () => {
     setIsSignUp((prevIsSignedUp) => !prevIsSignedUp);
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
+  const handleSubmit = async (event) => {
+    event.preventDefault();
     console.log(form);
+
+    const { fullName, userName, password, avatarUrl, phoneNumber } = form;
+    const URL = "http://localhost:5000/auth";
+    const {
+      data: { token, userId, hashedPassword },
+    } = await axios.post(`${URL}/${isSignUp ? "signup" : "login"}`, {
+      fullName,
+      userName,
+      password,
+      avatarUrl,
+      phoneNumber,
+    });
+    cookies.set("token", token);
+    cookies.set("userName", userName);
+    cookies.set("fullName", fullName);
+    cookies.set("userId", userId);
+
+    if (isSignUp) {
+      cookies.set("phoneNumber", phoneNumber);
+      cookies.set("avatar", avatarUrl);
+      cookies.set("hashedPasword", hashedPassword);
+    }
+
+    window.location.reload();
   };
 
   return (
@@ -110,7 +136,9 @@ const Auth = () => {
               </div>
             )}
             <div className="auth__form-container_fields-content_button">
-              <button type="submit">{!isSignUp ? "Sign in" : "Sign up"} </button>
+              <button type="submit">
+                {!isSignUp ? "Sign in" : "Sign up"}{" "}
+              </button>
             </div>
           </form>
           <div className="auth__form-container_fields-account">
